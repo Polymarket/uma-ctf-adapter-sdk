@@ -29,6 +29,7 @@
         "eslint-config-airbnb-base-typescript-prettier": "^4.1.0",
         "eslint-config-prettier": "^6.12.0",
         "eslint-plugin-import": "^2.22.1",
+        "ethers": "^5.4.5",
         "husky": "^4.3.0",
         "mocha": "^8.1.3",
         "prettier": "^2.1.2",
@@ -53,8 +54,5 @@
         "build": "tsc",
         "deploy": "yarn build && npm publish",
         "lint": "eslint --config ./.eslintrc.js --ignore-path ./.eslintignore src"
-    },
-    "dependencies": {
-        "ethers": "^5.4.5"
     }
 }
