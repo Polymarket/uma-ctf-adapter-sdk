@@ -57,7 +57,7 @@ export class UmaCtfAdapterClient {
         console.log(`Transaction hash: ${txn.hash}`);
         const receipt: TransactionReceipt = await txn.wait();
         const questionID = await this._parseEvent(receipt, "QuestionInitialized");
-        const conditionID = await this._parseEvent(receipt, "ConditionPrepared");
+        const conditionID = await this._parseEvent(receipt, "ConditionPreparation");
         console.log(`Question initialized!`);
         
         return {
