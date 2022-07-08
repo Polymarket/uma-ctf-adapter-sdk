@@ -1,5 +1,11 @@
 import { BigNumber } from "ethers";
 
+
+export interface QuestionInitializedPayload {
+    questionID: string;
+    conditionID: string;
+}
+
 export interface QuestionData {
     reward: BigNumber;
     proposalBond: BigNumber;

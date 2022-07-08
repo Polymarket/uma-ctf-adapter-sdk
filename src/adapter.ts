@@ -2,11 +2,11 @@ import { Contract } from "@ethersproject/contracts";
 import { JsonRpcSigner, TransactionReceipt } from "@ethersproject/providers";
 import { Wallet } from "@ethersproject/wallet";
 import { Interface } from "@ethersproject/abi";
-import { BigNumber, ethers, Transaction } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { ABI } from "./abi";
 import { getAdapterAddress } from "./networks";
 import { createFormattedAncillaryData } from "./utils";
-import { QuestionData } from "./model";
+import { QuestionData, QuestionInitializedPayload } from "./model";
 
 
 export class UmaCtfAdapterClient {
@@ -41,7 +41,7 @@ export class UmaCtfAdapterClient {
         reward: BigNumber,
         proposalBond: BigNumber,
         overrides?: ethers.Overrides,
-    ): Promise<string> {
+    ): Promise<QuestionInitializedPayload> {
         if( overrides == null) {
             overrides = {};
         }
@@ -56,9 +56,14 @@ export class UmaCtfAdapterClient {
         const txn = await this.contract.initializeQuestion(ancillaryData, rewardToken, reward, proposalBond, overrides);
         console.log(`Transaction hash: ${txn.hash}`);
         const receipt: TransactionReceipt = await txn.wait();
-        const questionID = this._parseEvent(receipt, "QuestionInitialized");
+        const questionID = await this._parseEvent(receipt, "QuestionInitialized");
+        const conditionID = await this._parseEvent(receipt, "ConditionPrepared");
         console.log(`Question initialized!`);
-        return questionID;
+        
+        return {
+            questionID,
+            conditionID
+        }
     }
 
     public async readyToResolve(questionID: string): Promise<boolean> {
