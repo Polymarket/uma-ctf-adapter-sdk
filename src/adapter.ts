@@ -7,6 +7,7 @@ import { adapterAbi, ctfAbi } from "./abi";
 import { getAdapterAddress } from "./networks";
 import { createFormattedAncillaryData, getEventArgument } from "./utils";
 import { QuestionData, QuestionInitializedPayload } from "./model";
+import { BigNumberish } from "@ethersproject/bignumber";
 
 
 export class UmaCtfAdapterClient {
@@ -19,14 +20,14 @@ export class UmaCtfAdapterClient {
         this.signer = signer;
         this.chainID = chainID;
         if(address != null){
-            this.contract = new Contract(address, adapterAbi, this.signer);
+            this.contract = new Contract(address, adapterAbi, signer);
         } else {
-            this.contract = new Contract(getAdapterAddress(chainID), adapterAbi, this.signer);
+            this.contract = new Contract(getAdapterAddress(chainID), adapterAbi, signer);
         }
     }
 
     /**
-     * Initializes a question on the adapter contract
+     * Initializes a question on the adapter
      * @param title
      * @param description
      * @param outcomes
@@ -68,10 +69,21 @@ export class UmaCtfAdapterClient {
         }
     }
 
+    /**
+     * Checks if a question is ready to be resolved
+     * @param questionID 
+     * @returns boolean
+     */
     public async readyToResolve(questionID: string): Promise<boolean> {
         return this.contract.readyToResolve(questionID);
     }
 
+    /**
+     * Resolves a question
+     * @param questionID 
+     * @param overrides 
+     * @returns 
+     */
     public async resolve(questionID: string, overrides?: ethers.Overrides): Promise<TransactionReceipt> {
         if(overrides == null) {
             overrides = {};
@@ -87,18 +99,7 @@ export class UmaCtfAdapterClient {
      * @param questionID
      */
      public async getQuestionData(questionID: string): Promise<QuestionData> {
-        const data = await this.contract.questions(questionID);
-        return {
-            ancillaryData: data.ancillaryData,
-            rewardToken: data.rewardToken,
-            reward: data.reward,
-            proposalBond: data.proposalBond,
-            requestTimestamp: data.requestTimestamp,
-            adminResolutionTimestamp: data.adminResolutionTimestamp,
-            resolved: data.resolved,
-            paused: data.paused,
-            creator: data.creator,
-        };
+        return this.contract.questions(questionID);
     }
 
     /**
@@ -148,11 +149,11 @@ export class UmaCtfAdapterClient {
     }
 
     /**
-     * Emergency resolve
+     * Emergency resolve a question
      * @param questionID
      * @param payouts
      */
-    public async emergencyReportPayouts(
+    public async emergencyResolve(
         questionID: string,
         payouts: number[] | BigNumber[],
         overrides?: ethers.Overrides,
@@ -188,12 +189,25 @@ export class UmaCtfAdapterClient {
     }
 
     /**
-     * Emergency report payouts
+     * Checks if a question is flagged
      * @param questionID
      * @returns
      */
     public async isFlagged(questionID: string): Promise<boolean> {
         console.log(`Checking if question has been flagged for emergency resolution...`);
         return this.contract.isFlagged(questionID);
+    }
+
+    /**
+     * Checks if an address has admin authorization
+     * @param address 
+     * @returns boolean
+     */
+    public async isAdmin(address: string): Promise<boolean> {
+        const wardBn: BigNumberish = await this.contract.wards(address);
+        if(wardBn == null) {
+            return false;
+        }
+        return wardBn.toString() == "1";
     }
 }
