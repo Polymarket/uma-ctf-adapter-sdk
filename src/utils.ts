@@ -1,4 +1,6 @@
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { ethers } from "ethers";
+import { Interface } from "@ethersproject/abi";
 
 
 /**
@@ -36,4 +38,15 @@ export const extractOutcomes = (ancillaryDataString: string): string[] | null =>
 export const createFormattedAncillaryData = (title: string, description: string, outcomes: string[]): Uint8Array => {
     // TODO: update to new ancillary data format
     return ethers.utils.toUtf8Bytes(`q: title: ${title}, description: ${description} res_data: ${buildResolutionData(outcomes)}`);
+}
+
+export const getEventArgument = (receipt: TransactionReceipt, iface: Interface, event: string, arg: string): string => {
+    let val;
+    for(const log of receipt.logs) {
+        if(log.topics[0] == iface.getEventTopic(event)){
+            const evt = iface.parseLog(log);
+            val = evt.args[arg];
+        }
+    }
+    return val;
 }

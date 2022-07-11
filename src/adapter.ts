@@ -3,15 +3,15 @@ import { JsonRpcSigner, TransactionReceipt } from "@ethersproject/providers";
 import { Wallet } from "@ethersproject/wallet";
 import { Interface } from "@ethersproject/abi";
 import { BigNumber, ethers } from "ethers";
-import { ABI } from "./abi";
+import { adapterAbi, ctfAbi } from "./abi";
 import { getAdapterAddress } from "./networks";
-import { createFormattedAncillaryData } from "./utils";
+import { createFormattedAncillaryData, getEventArgument } from "./utils";
 import { QuestionData, QuestionInitializedPayload } from "./model";
 
 
 export class UmaCtfAdapterClient {
 
-    public static Abi: Interface = new Interface(ABI)
+    public static iface: Interface = new Interface(adapterAbi)
 
     readonly chainID: number;
     readonly signer: JsonRpcSigner | Wallet;
@@ -21,11 +21,10 @@ export class UmaCtfAdapterClient {
         this.signer = signer;
         this.chainID = chainID;
         if(address != null){
-            this.contract = new Contract(address, UmaCtfAdapterClient.Abi, this.signer);
+            this.contract = new Contract(address, UmaCtfAdapterClient.iface, this.signer);
         } else {
-            this.contract = new Contract(getAdapterAddress(chainID), UmaCtfAdapterClient.Abi, this.signer);
+            this.contract = new Contract(getAdapterAddress(chainID), UmaCtfAdapterClient.iface, this.signer);
         }
-        
     }
 
     /**
@@ -61,8 +60,8 @@ export class UmaCtfAdapterClient {
         const txn = await this.contract.initializeQuestion(ancillaryData, rewardToken, reward, proposalBond, overrides);
         console.log(`Transaction hash: ${txn.hash}`);
         const receipt: TransactionReceipt = await txn.wait();
-        const questionID = await this._parseEventArg(receipt, "QuestionInitialized", "questionID");
-        const conditionID = await this._parseEventArg(receipt, "ConditionPreparation", "conditionId");
+        const questionID = getEventArgument(receipt, this.contract.interface, "QuestionInitialized", "questionID");
+        const conditionID = getEventArgument(receipt, new Interface(ctfAbi), "ConditionPreparation", "conditionId");
         console.log(`Question initialized!`);
         
         return {
@@ -199,16 +198,4 @@ export class UmaCtfAdapterClient {
         console.log(`Checking if question has been flagged for emergency resolution...`);
         return this.contract.isFlagged(questionID);
     }
-
-    private async _parseEventArg(receipt: TransactionReceipt, event: string, arg: string): Promise<string> {
-        let val;
-        for(const log of receipt.logs) {
-            if(log.topics[0] == this.contract.interface.getEventTopic(event)){
-                const evt = this.contract.interface.parseLog(log);
-                val = evt.args[arg];
-            }
-        }
-        return val;
-    }
-
 }

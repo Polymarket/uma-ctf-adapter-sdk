@@ -1,4 +1,4 @@
-export const ABI = [
+export const adapterAbi = [
     {
       "inputs": [
         {
