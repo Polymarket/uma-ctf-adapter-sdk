@@ -11,8 +11,6 @@ import { QuestionData, QuestionInitializedPayload } from "./model";
 
 export class UmaCtfAdapterClient {
 
-    public static iface: Interface = new Interface(adapterAbi)
-
     readonly chainID: number;
     readonly signer: JsonRpcSigner | Wallet;
     readonly contract: Contract;
@@ -21,9 +19,9 @@ export class UmaCtfAdapterClient {
         this.signer = signer;
         this.chainID = chainID;
         if(address != null){
-            this.contract = new Contract(address, UmaCtfAdapterClient.iface, this.signer);
+            this.contract = new Contract(address, adapterAbi, this.signer);
         } else {
-            this.contract = new Contract(getAdapterAddress(chainID), UmaCtfAdapterClient.iface, this.signer);
+            this.contract = new Contract(getAdapterAddress(chainID), adapterAbi, this.signer);
         }
     }
 
