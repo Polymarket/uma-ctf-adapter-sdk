@@ -56,8 +56,8 @@ export class UmaCtfAdapterClient {
         const txn = await this.contract.initializeQuestion(ancillaryData, rewardToken, reward, proposalBond, overrides);
         console.log(`Transaction hash: ${txn.hash}`);
         const receipt: TransactionReceipt = await txn.wait();
-        const questionID = await this._parseEvent(receipt, "QuestionInitialized");
-        const conditionID = await this._parseEvent(receipt, "ConditionPreparation");
+        const questionID = await this._parseEventArg(receipt, "QuestionInitialized", "questionID");
+        const conditionID = await this._parseEventArg(receipt, "ConditionPreparation", "conditionId");
         console.log(`Question initialized!`);
         
         return {
@@ -195,15 +195,15 @@ export class UmaCtfAdapterClient {
         return this.contract.isFlagged(questionID);
     }
 
-    private async _parseEvent(receipt: TransactionReceipt, event: string): Promise<string> {
-        let questionID;
+    private async _parseEventArg(receipt: TransactionReceipt, event: string, arg: string): Promise<string> {
+        let val;
         for(const log of receipt.logs) {
             if(log.topics[0] == this.contract.interface.getEventTopic(event)){
                 const evt = this.contract.interface.parseLog(log);
-                questionID = evt.args.questionID;
+                val = evt.args[arg];
             }
         }
-        return questionID;
+        return val;
     }
 
 }
