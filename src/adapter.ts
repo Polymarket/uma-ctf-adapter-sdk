@@ -17,10 +17,15 @@ export class UmaCtfAdapterClient {
     readonly signer: JsonRpcSigner | Wallet;
     readonly contract: Contract;
 
-    constructor(signer: JsonRpcSigner | Wallet, chainID: number) {
+    constructor(signer: JsonRpcSigner | Wallet, chainID: number, address?: string) {
         this.signer = signer;
         this.chainID = chainID;
-        this.contract = new Contract(getAdapterAddress(this.chainID), UmaCtfAdapterClient.Abi, this.signer);
+        if(address != null){
+            this.contract = new Contract(address, UmaCtfAdapterClient.Abi, this.signer);
+        } else {
+            this.contract = new Contract(getAdapterAddress(chainID), UmaCtfAdapterClient.Abi, this.signer);
+        }
+        
     }
 
     /**
