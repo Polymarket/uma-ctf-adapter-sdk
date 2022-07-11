@@ -10,7 +10,7 @@ import { QuestionData, QuestionInitializedPayload } from "./model";
 import { BigNumberish } from "@ethersproject/bignumber";
 
 
-export class UmaCtfAdapterClient {
+export class Client {
 
     readonly chainID: number;
     readonly signer: JsonRpcSigner | Wallet;
