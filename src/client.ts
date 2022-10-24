@@ -10,7 +10,6 @@ import { QuestionData, QuestionInitializedPayload } from "./model";
 
 
 export class Client {
-
     readonly chainID: number;
     readonly signer: JsonRpcSigner | Wallet;
     readonly contract: Contract;
