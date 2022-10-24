@@ -43,10 +43,7 @@
     ],
     "keywords": [
         "blockchain",
-        "ethereum",
-        "hardhat",
-        "smart-contracts",
-        "solidity"
+        "smart-contracts"
     ],
     "license": "MIT",
     "scripts": {
