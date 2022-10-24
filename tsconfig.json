@@ -4,7 +4,8 @@
         "forceConsistentCasingInFileNames": true,
         "lib": [
             "es5",
-            "es6"
+            "es6",
+            "dom"
         ],
         "module": "commonjs",
         "moduleResolution": "node",
@@ -22,6 +23,5 @@
     ],
     "include": [
         "src",
-        "test"
     ],
 }
