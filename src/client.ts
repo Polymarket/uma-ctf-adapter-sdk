@@ -5,7 +5,7 @@ import { Interface } from "@ethersproject/abi";
 import { BigNumber, ethers } from "ethers";
 import { adapterAbi, ctfAbi } from "./abi";
 import { getAdapterAddress } from "./networks";
-import { createFormattedAncillaryData, getEventArgument } from "./utils";
+import { createAncillaryData, getEventArgument } from "./utils";
 import { QuestionData, QuestionInitializedPayload } from "./model";
 
 
@@ -53,7 +53,7 @@ export class Client {
         }
 
         // Dynamically generate ancillary data with binary resolution data appended
-        const ancillaryData = createFormattedAncillaryData(title, description, outcomes);
+        const ancillaryData = createAncillaryData(title, description, outcomes);
 
         const txn = await this.contract.initialize(ancillaryData, rewardToken, reward, proposalBond, overrides);
         console.log(`Transaction hash: ${txn.hash}`);

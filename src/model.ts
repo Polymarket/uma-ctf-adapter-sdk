@@ -7,12 +7,13 @@ export interface QuestionInitializedPayload {
 }
 
 export interface QuestionData {
+    requestTimestamp: BigNumber;
     reward: BigNumber;
     proposalBond: BigNumber;
-    requestTimestamp: BigNumber;
-    adminResolutionTimestamp: BigNumber;
+    emergencyResolutionTimestamp: BigNumber;
     resolved: boolean;
     paused: boolean;
+    reset: boolean;
     rewardToken: string;
     creator: string;
     ancillaryData: string;
