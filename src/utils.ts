@@ -10,8 +10,7 @@ import { Interface } from "@ethersproject/abi";
  * @returns 
  */
 export const buildResolutionData = (outcomes: string[]): string => {
-    return `p1: 0, p2: 1, p3: 0.5, p4: -57896044618658097711785492504343953926634992332820282019728.792003956564819968.
-    Where p1 corresponds to ${outcomes[1]}, p2 to a ${outcomes[0]}, p3 to unknown, and p4 to an early request`;
+    return `p1: 0, p2: 1, p3: 0.5. Where p1 corresponds to ${outcomes[1]}, p2 to a ${outcomes[0]}, p3 to unknown`;
 }
 
 export const OUTCOME_REGEX = /Where p1 corresponds to (\w+), p2 to a (\w+)/;
@@ -25,9 +24,8 @@ export const extractOutcomes = (ancillaryDataString: string): string[] | null =>
     return null;
 }
 
-
 /**
- * Creates the formatted ancillary data used to resolve questions
+ * Creates the ancillary data used to resolve questions
  * Appends resolution request information
  * 
  * @param title 
@@ -35,8 +33,7 @@ export const extractOutcomes = (ancillaryDataString: string): string[] | null =>
  * @param outcomes 
  * @returns 
  */
-export const createFormattedAncillaryData = (title: string, description: string, outcomes: string[]): Uint8Array => {
-    // TODO: update to new ancillary data format
+export const createAncillaryData = (title: string, description: string, outcomes: string[]): Uint8Array => {
     return ethers.utils.toUtf8Bytes(`q: title: ${title}, description: ${description} res_data: ${buildResolutionData(outcomes)}`);
 }
 

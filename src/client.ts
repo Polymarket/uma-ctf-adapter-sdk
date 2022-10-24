@@ -7,7 +7,6 @@ import { adapterAbi, ctfAbi } from "./abi";
 import { getAdapterAddress } from "./networks";
 import { createFormattedAncillaryData, getEventArgument } from "./utils";
 import { QuestionData, QuestionInitializedPayload } from "./model";
-import { BigNumberish } from "@ethersproject/bignumber";
 
 
 export class Client {
@@ -36,7 +35,7 @@ export class Client {
      * @param proposalBond
      * @returns questionID: string
      */
-     public async initializeQuestion(
+     public async initialize(
         title: string,
         description: string,
         outcomes: string[],
@@ -56,7 +55,7 @@ export class Client {
         // Dynamically generate ancillary data with binary resolution data appended
         const ancillaryData = createFormattedAncillaryData(title, description, outcomes);
 
-        const txn = await this.contract.initializeQuestion(ancillaryData, rewardToken, reward, proposalBond, overrides);
+        const txn = await this.contract.initialize(ancillaryData, rewardToken, reward, proposalBond, overrides);
         console.log(`Transaction hash: ${txn.hash}`);
         const receipt: TransactionReceipt = await txn.wait();
         const questionID = getEventArgument(receipt, this.contract.interface, "QuestionInitialized", "questionID");
@@ -74,8 +73,8 @@ export class Client {
      * @param questionID 
      * @returns boolean
      */
-    public async readyToResolve(questionID: string): Promise<boolean> {
-        return this.contract.readyToResolve(questionID);
+    public async ready(questionID: string): Promise<boolean> {
+        return this.contract.ready(questionID);
     }
 
     /**
@@ -84,7 +83,12 @@ export class Client {
      * @param overrides 
      * @returns 
      */
-    public async resolve(questionID: string, overrides?: ethers.Overrides): Promise<TransactionReceipt> {
+    public async resolve(questionID: string, overrides?: ethers.Overrides): Promise<TransactionReceipt | void> {
+        if(!(await this.ready(questionID))) {
+            console.log(`QuestionID: ${questionID} is not ready to be resolved!`);
+            return;
+        }
+
         if(overrides == null) {
             overrides = {};
         }
@@ -95,19 +99,19 @@ export class Client {
     }
 
     /**
-     * Fetch initialized question data
+     * Fetch question data
      * @param questionID
      */
-     public async getQuestionData(questionID: string): Promise<QuestionData> {
-        return this.contract.questions(questionID);
+     public async getQuestion(questionID: string): Promise<QuestionData> {
+        return this.contract.getQuestion(questionID);
     }
 
     /**
-     * Determines whether or not a questionID has been initialized
+     * Determines whether or not a question has been initialized
      * @param questionID
      * @returns boolean
      */
-    public async isQuestionInitialized(questionID: string): Promise<boolean> {
+    public async isInitialized(questionID: string): Promise<boolean> {
         return this.contract.isQuestionInitialized(questionID);
     }
 
@@ -116,13 +120,13 @@ export class Client {
      * @param questionID
      * @param overrides
      */
-     public async pauseQuestion(questionID: string, overrides?: ethers.Overrides): Promise<TransactionReceipt> {
+     public async pause(questionID: string, overrides?: ethers.Overrides): Promise<TransactionReceipt> {
         console.log(`Pausing questionID: ${questionID}...`);
         if( overrides == null) {
             overrides = {};
         }
         
-        const txn = await this.contract.pauseQuestion(questionID, overrides);
+        const txn = await this.contract.pause(questionID, overrides);
         
         console.log(`Transaction hash: ${txn.hash}`);
         const receipt: TransactionReceipt = await txn.wait();
@@ -135,12 +139,12 @@ export class Client {
      * @param questionID
      * @param overrides
      */
-    public async unpauseQuestion(questionID: string, overrides?: ethers.Overrides): Promise<TransactionReceipt> {
+    public async unpause(questionID: string, overrides?: ethers.Overrides): Promise<TransactionReceipt> {
         console.log(`Unpausing questionID: ${questionID}...`);
         if( overrides == null) {
             overrides = {};
         }
-        const txn = await this.contract.unpauseQuestion(questionID, overrides);
+        const txn = await this.contract.unpause(questionID, overrides);
         
         console.log(`Transaction hash: ${txn.hash}`);
         const receipt: TransactionReceipt = await txn.wait();
@@ -181,6 +185,7 @@ export class Client {
         if( overrides == null ){
             overrides = {};
         }
+
         const txn = await this.contract.flag(questionID, overrides);
         console.log(`Transaction hash: ${txn.hash}`);
         const receipt: TransactionReceipt = await txn.wait();
@@ -204,10 +209,6 @@ export class Client {
      * @returns boolean
      */
     public async isAdmin(address: string): Promise<boolean> {
-        const wardBn: BigNumberish = await this.contract.wards(address);
-        if(wardBn == null) {
-            return false;
-        }
-        return wardBn.toString() == "1";
+        return this.contract.isAdmin(address);
     }
 }

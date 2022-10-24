@@ -1,7 +1,7 @@
 {
-    "name": "@polymarket/uma-binary-adapter-sdk-v2",
+    "name": "@polymarket/uma-ctf-adapter-sdk",
     "description": "SDK for the UMA CTF Adapter",
-    "version": "0.0.8",
+    "version": "0.0.1",
     "contributors": [
         {
             "name": "Jonathan Amenechi",
@@ -21,7 +21,6 @@
         "@ethersproject/providers": "5.4.2",
         "@ethersproject/random": "^5.4.0",
         "@ethersproject/transactions": "^5.4.0",
-        "@polymarket/uma-ctf-binary-adapter": "2.0.0",
         "commitizen": "^4.2.1",
         "cz-conventional-changelog": "^3.3.0",
         "dotenv": "^8.2.0",
