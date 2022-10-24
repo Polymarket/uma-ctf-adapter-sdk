@@ -15,11 +15,11 @@ export class Client {
     readonly signer: JsonRpcSigner | Wallet;
     readonly contract: Contract;
 
-    constructor(signer: JsonRpcSigner | Wallet, chainID: number, address?: string) {
+    constructor(signer: JsonRpcSigner | Wallet, chainID: number, contractAddress?: string) {
         this.signer = signer;
         this.chainID = chainID;
-        if(address != null){
-            this.contract = new Contract(address, adapterAbi, signer);
+        if(contractAddress != null){
+            this.contract = new Contract(contractAddress, adapterAbi, signer);
         } else {
             this.contract = new Contract(getAdapterAddress(chainID), adapterAbi, signer);
         }
@@ -117,6 +117,7 @@ export class Client {
 
     /**
      * Pauses a question and prevents its resolution in an emergency
+     * Only available to admins
      * @param questionID
      * @param overrides
      */
@@ -136,6 +137,7 @@ export class Client {
 
     /**
      * Unpauses a question and allows it to be resolved
+     * Only available to admins 
      * @param questionID
      * @param overrides
      */
@@ -154,6 +156,7 @@ export class Client {
 
     /**
      * Emergency resolve a question
+     * Only available to admins
      * @param questionID
      * @param payouts
      */
@@ -175,6 +178,7 @@ export class Client {
 
     /**
      * Flag question for emergency resolution
+     * Only available to admins
      * @param questionID
      */
     public async flag(

@@ -13,14 +13,13 @@ const signer = new Wallet("0x" + process.env.KEY);
 const client = new Client(signer, 137);
 
 // Initialize question
-await client.initializeQuestion(
+await client.initialize(
     title, 
     description,
     outcomes, 
     rewardToken, 
     reward, 
-    proposalBond, 
-    { gasPrice: ethers.utils.parseUnits("100", 9) }
+    proposalBond
 );
 
 // Resolve the question
