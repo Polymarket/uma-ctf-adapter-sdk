@@ -83,6 +83,13 @@ export class Client {
      * @returns 
      */
     public async resolve(questionID: string, overrides?: ethers.Overrides): Promise<TransactionReceipt | void> {
+        const data = await this.getQuestion(questionID);
+        
+        if(data.resolved) {
+            console.log(`QuestionID: ${questionID} has already been resolved!`);
+            return;
+        }
+
         if(!(await this.ready(questionID))) {
             console.log(`QuestionID: ${questionID} is not ready to be resolved!`);
             return;
