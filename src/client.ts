@@ -50,6 +50,7 @@ export class Client {
         if (outcomes.length != 2) {
             throw new Error("Invalid outcome length! Must be 2!");
         }
+        console.log(`Initializing...`);
 
         // Dynamically generate ancillary data with binary resolution data appended
         const ancillaryData = createAncillaryData(title, description, outcomes);
@@ -207,6 +208,25 @@ export class Client {
         console.log(`Transaction hash: ${txn.hash}`);
         const receipt: TransactionReceipt = await txn.wait();
         console.log(`Question flagged for emergency resolution!`);
+        return receipt;
+    }
+
+    /**
+     * Reset a question
+     * Only available to admins
+     * @param questionID
+     * @param overrides
+     */
+     public async reset(questionID: string, overrides?: ethers.Overrides): Promise<TransactionReceipt> {
+        console.log(`Resetting questionID: ${questionID}...`);
+        if( overrides == null) {
+            overrides = {};
+        }
+        const txn = await this.contract.reset(questionID, overrides);
+        
+        console.log(`Transaction hash: ${txn.hash}`);
+        const receipt: TransactionReceipt = await txn.wait();
+        console.log(`Question reset!`);
         return receipt;
     }
 
