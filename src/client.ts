@@ -126,7 +126,7 @@ export class Client {
      * @returns boolean
      */
     public async isInitialized(questionID: string): Promise<boolean> {
-        return this.contract.isQuestionInitialized(questionID);
+        return this.contract.isInitialized(questionID);
     }
 
     /**
