@@ -100,12 +100,9 @@ export class Client {
             overrides = {};
         }
         console.log(`Resolving questionID: ${questionID}...`);
-        console.log(`Payouts:`);
-        console.log(await this.getExpectedPayouts(questionID))
         const txn = await this.contract.resolve(questionID, overrides);
         console.log(`Transaction hash: ${txn.hash}`);
-        const receipt = await txn.wait();
-        return receipt;
+        return txn.wait();
     }
 
     /**
