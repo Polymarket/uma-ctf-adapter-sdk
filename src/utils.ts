@@ -10,7 +10,7 @@ import { Interface } from "@ethersproject/abi";
  * @returns 
  */
 export const buildResolutionData = (outcomes: string[]): string => {
-    return `p1: 0, p2: 1, p3: 0.5. Where p1 corresponds to ${outcomes[1]}, p2 to a ${outcomes[0]}, p3 to unknown`;
+    return `p1: 0, p2: 1, p3: 0.5. Where p1 corresponds to ${outcomes[1]}, p2 to ${outcomes[0]}, p3 to unknown/50-50`;
 }
 
 export const OUTCOME_REGEX = /Where p1 corresponds to (\w+), p2 to a (\w+)/;
