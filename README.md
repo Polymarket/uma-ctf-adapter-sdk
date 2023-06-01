@@ -5,7 +5,7 @@ Lightweight wrapper SDK around the [`UmaCtfAdapter`](https://github.com/Polymark
 ### Usage
 
 ```ts
-import { ClientV2, ClientV3 } from "@polymarket/uma-ctf-adapter-sdk";
+import { ClientV1, ClientV2, ClientV3 } from "@polymarket/uma-ctf-adapter-sdk";
 const signer = new Wallet("0x" + process.env.KEY);
 const v2 = new ClientV2(signer, 137);
 const v3 = new ClientV3(signer, 137);
