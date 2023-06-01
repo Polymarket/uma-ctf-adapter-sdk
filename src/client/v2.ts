@@ -1,30 +1,24 @@
-import { JsonRpcSigner, TransactionReceipt } from "@ethersproject/providers";
+import { JsonRpcSigner, TransactionReceipt, TransactionResponse } from "@ethersproject/providers";
 import { Wallet } from "@ethersproject/wallet";
 import { Interface } from "@ethersproject/abi";
-import { Contract, ContractInterface } from "@ethersproject/contracts";
-
 import { BigNumber, ethers } from "ethers";
 
 import { ctfAbi, v2Abi } from "../abi";
 import { getCanonicalContractAddress } from "../networks";
-import { InitializePayload, QuestionDataV2, QuestionInitializedPayload } from "../model";
+import { QuestionDataV2, QuestionInitializedPayload } from "../model";
 import { createAncillaryData, getEventArgument } from "../utils";
+import { BaseAdapterClient } from "./base";
+import { ChainID } from "./chainID";
 
-export class ClientV2 {
-    chainID: number;
-    signer: JsonRpcSigner | Wallet;
-    contract: Contract;
+
+export class ClientV2 extends BaseAdapterClient {
 
     public static INTERFACE: Interface = new Interface(v2Abi);
 
-    constructor(signer: JsonRpcSigner | Wallet, chainID: number, contractAddress?: string) {
-        this.chainID = chainID;
-        this.signer = signer;
-        this.contract = new Contract(
-            contractAddress != null ? contractAddress: getCanonicalContractAddress(2),
-            ClientV2.INTERFACE,
-            signer
-        );
+    constructor(signer: JsonRpcSigner | Wallet, chainID: ChainID, contractAddress?: string) {
+        const address = contractAddress != null ? contractAddress: getCanonicalContractAddress(2);
+        const abi = ClientV2.INTERFACE;
+        super(signer, chainID, abi, address);
     }
 
     /**
@@ -37,10 +31,15 @@ export class ClientV2 {
      * @param proposalBond
      * @returns questionID: string
      */
-     public async initialize(payload: InitializePayload): Promise<QuestionInitializedPayload> {
-        let { title, description, outcomes, rewardToken, reward,
-            proposalBond, overrides } = payload;
-        
+     public async initialize(
+        title: string,
+        description: string,
+        outcomes: string[],
+        rewardToken: string,
+        reward: BigNumber,
+        proposalBond: BigNumber,
+        overrides?: ethers.Overrides,
+     ): Promise<QuestionInitializedPayload> {       
         if( overrides == null) {
             overrides = {};
         }
@@ -52,8 +51,8 @@ export class ClientV2 {
 
         // Dynamically generate ancillary data with binary resolution data appended
         const ancillaryData = createAncillaryData(title, description, outcomes);
-
-        const txn = await this.contract.initialize(ancillaryData, rewardToken, reward, proposalBond, overrides);
+        
+        const txn: TransactionResponse = await this.contract.initialize(ancillaryData, rewardToken, reward, proposalBond, overrides);
         console.log(`Transaction hash: ${txn.hash}`);
         const receipt: TransactionReceipt = await txn.wait();
         const questionID = getEventArgument(receipt, this.contract.interface, "QuestionInitialized", "questionID");
@@ -242,42 +241,5 @@ export class ClientV2 {
      */
     public async isAdmin(address: string): Promise<boolean> {
         return this.contract.isAdmin(address);
-    }
-
-    private async _initialize(
-        title: string,
-        description: string,
-        outcomes: string[],
-        rewardToken: string,
-        reward: BigNumber,
-        bond: BigNumber,
-        liveness?: BigNumber,
-        overrides?: ethers.Overrides,
-    ): Promise<QuestionInitializedPayload> {
-        if (outcomes.length != 2) {
-            throw new Error("Invalid outcome length! Must be 2!");
-        }
-        
-        console.log(`Initializing...`);
-
-        // Dynamically generate ancillary data with binary resolution data appended
-        const ancillaryData = createAncillaryData(title, description, outcomes);
-
-        let txn;
-        if(liveness == null){
-            txn = await this.contract.initialize(ancillaryData, rewardToken, reward, bond, overrides);
-        } else {
-            txn = await this.contract.initialize(ancillaryData, rewardToken, reward, bond, liveness, overrides);
-        }
-        console.log(`Transaction hash: ${txn.hash}`);
-        
-        const receipt: TransactionReceipt = await txn.wait();
-        const questionID = getEventArgument(receipt, this.contract.interface, "QuestionInitialized", "questionID");
-        const conditionID = getEventArgument(receipt, new Interface(ctfAbi), "ConditionPreparation", "conditionId");
-        console.log(`Question initialized!`);
-        return {
-            questionID,
-            conditionID
-        }
     }
 }

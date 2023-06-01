@@ -1,26 +1,22 @@
 import { JsonRpcSigner, TransactionReceipt, TransactionResponse } from "@ethersproject/providers";
 import { Wallet } from "@ethersproject/wallet";
 import { Interface } from "@ethersproject/abi";
-import { Contract } from "@ethersproject/contracts";
 import { BigNumber, ethers } from "ethers";
 
 import { v1Abi } from "../abi";
 import { getCanonicalContractAddress } from "../networks";
 import { createAncillaryData } from "../utils";
 import { QuestionDataV1 } from "../model";
+import { BaseAdapterClient } from "./base";
+import { ChainID } from "./chainID";
 
-export class ClientV1 {
-    chainID: number;
-    signer: JsonRpcSigner | Wallet;
-    contract: Contract;
-
+export class ClientV1 extends BaseAdapterClient {
     public static INTERFACE: Interface = new Interface(v1Abi);
 
-    constructor(signer: JsonRpcSigner | Wallet, chainID: number, contractAddress?: string) {
-        this.chainID = chainID;
-        this.signer = signer;
+    constructor(signer: JsonRpcSigner | Wallet, chainID: ChainID, contractAddress?: string) {
         const address = contractAddress != null ? contractAddress: getCanonicalContractAddress(1);
-        this.contract = new Contract(address, ClientV1.INTERFACE, signer)
+        const abi = ClientV1.INTERFACE;
+        super(signer, chainID, abi, address);
     }
 
      /**

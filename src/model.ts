@@ -1,15 +1,4 @@
-import { BigNumber, ethers } from "ethers";
-
-export interface InitializePayload {
-    title: string,
-    description: string,
-    outcomes: string[],
-    rewardToken: string,
-    reward: BigNumber,
-    proposalBond: BigNumber,
-    liveness? : BigNumber,
-    overrides?: ethers.Overrides,
-}
+import { BigNumber } from "ethers";
 
 export interface QuestionInitializedPayload {
     questionID: string;
