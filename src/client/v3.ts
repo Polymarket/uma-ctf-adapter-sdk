@@ -13,6 +13,8 @@ import { getCanonicalContractAddress } from "../networks";
 
 export class ClientV3 extends ClientV2 {
 
+    public static INTERFACE: Interface = new Interface(v3Abi);
+
     constructor(signer: JsonRpcSigner | Wallet, chainID: number, contractAddress?: string) {
         super(signer, chainID);
         const address = contractAddress != null ? contractAddress: getCanonicalContractAddress(3);

@@ -16,7 +16,21 @@ export interface QuestionInitializedPayload {
     conditionID: string;
 }
 
-export interface QuestionData {
+export interface QuestionDataV1 {
+    resolutionTime: BigNumber;
+    reward: BigNumber;
+    proposalBond: BigNumber;
+    settled: BigNumber;
+    requestTimestamp: BigNumber;
+    adminResolutionTimestamp: BigNumber;
+    earlyResolutionEnabled: boolean;
+    resolved: boolean;
+    paused: boolean;
+    rewardToken: string;
+    ancillaryData: string;
+}
+
+export interface QuestionDataV2 {
     requestTimestamp: BigNumber;
     reward: BigNumber;
     proposalBond: BigNumber;

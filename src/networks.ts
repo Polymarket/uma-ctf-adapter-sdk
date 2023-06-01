@@ -1,3 +1,8 @@
+/**
+ * Fetches the canonical UMA CTF Adapter contract address for a specific version
+ * @param version 
+ * @returns 
+ */
 export const getCanonicalContractAddress = (version: number): string => {
     switch (version) {
         case 1:

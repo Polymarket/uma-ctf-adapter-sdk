@@ -7,7 +7,7 @@ import { BigNumber, ethers } from "ethers";
 
 import { ctfAbi, v2Abi } from "../abi";
 import { getCanonicalContractAddress } from "../networks";
-import { InitializePayload, QuestionData, QuestionInitializedPayload } from "../model";
+import { InitializePayload, QuestionDataV2, QuestionInitializedPayload } from "../model";
 import { createAncillaryData, getEventArgument } from "../utils";
 
 export class ClientV2 {
@@ -107,7 +107,7 @@ export class ClientV2 {
      * Fetch question data
      * @param questionID
      */
-     public async getQuestion(questionID: string): Promise<QuestionData> {
+     public async getQuestion(questionID: string): Promise<QuestionDataV2> {
         return this.contract.getQuestion(questionID);
     }
 
