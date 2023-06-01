@@ -1,27 +1,24 @@
-import { Contract } from "@ethersproject/contracts";
-import { JsonRpcSigner, TransactionReceipt } from "@ethersproject/providers";
+import { JsonRpcSigner, TransactionReceipt, TransactionResponse } from "@ethersproject/providers";
 import { Wallet } from "@ethersproject/wallet";
 import { Interface } from "@ethersproject/abi";
 import { BigNumber, ethers } from "ethers";
-import { adapterAbi, ctfAbi } from "./abi";
-import { getAdapterAddress } from "./networks";
-import { createAncillaryData, getEventArgument } from "./utils";
-import { QuestionData, QuestionInitializedPayload } from "./model";
+
+import { ctfAbi, v2Abi } from "../abi";
+import { getCanonicalContractAddress } from "../networks";
+import { QuestionDataV2, QuestionInitializedPayload } from "../model";
+import { createAncillaryData, getEventArgument } from "../utils";
+import { BaseAdapterClient } from "./base";
+import { ChainID } from "./chainID";
 
 
-export class Client {
-    readonly chainID: number;
-    readonly signer: JsonRpcSigner | Wallet;
-    readonly contract: Contract;
+export class ClientV2 extends BaseAdapterClient {
 
-    constructor(signer: JsonRpcSigner | Wallet, chainID: number, contractAddress?: string) {
-        this.signer = signer;
-        this.chainID = chainID;
-        if(contractAddress != null){
-            this.contract = new Contract(contractAddress, adapterAbi, signer);
-        } else {
-            this.contract = new Contract(getAdapterAddress(chainID), adapterAbi, signer);
-        }
+    public static INTERFACE: Interface = new Interface(v2Abi);
+
+    constructor(signer: JsonRpcSigner | Wallet, chainID: ChainID, contractAddress?: string) {
+        const address = contractAddress != null ? contractAddress: getCanonicalContractAddress(2);
+        const abi = ClientV2.INTERFACE;
+        super(signer, chainID, abi, address);
     }
 
     /**
@@ -42,7 +39,7 @@ export class Client {
         reward: BigNumber,
         proposalBond: BigNumber,
         overrides?: ethers.Overrides,
-    ): Promise<QuestionInitializedPayload> {
+     ): Promise<QuestionInitializedPayload> {       
         if( overrides == null) {
             overrides = {};
         }
@@ -54,8 +51,8 @@ export class Client {
 
         // Dynamically generate ancillary data with binary resolution data appended
         const ancillaryData = createAncillaryData(title, description, outcomes);
-
-        const txn = await this.contract.initialize(ancillaryData, rewardToken, reward, proposalBond, overrides);
+        
+        const txn: TransactionResponse = await this.contract.initialize(ancillaryData, rewardToken, reward, proposalBond, overrides);
         console.log(`Transaction hash: ${txn.hash}`);
         const receipt: TransactionReceipt = await txn.wait();
         const questionID = getEventArgument(receipt, this.contract.interface, "QuestionInitialized", "questionID");
@@ -109,7 +106,7 @@ export class Client {
      * Fetch question data
      * @param questionID
      */
-     public async getQuestion(questionID: string): Promise<QuestionData> {
+     public async getQuestion(questionID: string): Promise<QuestionDataV2> {
         return this.contract.getQuestion(questionID);
     }
 

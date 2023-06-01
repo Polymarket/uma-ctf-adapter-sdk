@@ -6,6 +6,8 @@ module.exports = {
     },
     rules: {
         "no-console": "off",
+        "prefer-const": "off",
+        "no-explicit-any": "off"
     },
     root: true,
     parser: '@typescript-eslint/parser',
