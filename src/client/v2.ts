@@ -1,27 +1,30 @@
-import { Contract } from "@ethersproject/contracts";
 import { JsonRpcSigner, TransactionReceipt } from "@ethersproject/providers";
 import { Wallet } from "@ethersproject/wallet";
 import { Interface } from "@ethersproject/abi";
+import { Contract, ContractInterface } from "@ethersproject/contracts";
+
 import { BigNumber, ethers } from "ethers";
-import { adapterAbi, ctfAbi } from "./abi";
-import { getAdapterAddress } from "./networks";
-import { createAncillaryData, getEventArgument } from "./utils";
-import { QuestionData, QuestionInitializedPayload } from "./model";
 
+import { ctfAbi, v2Abi } from "../abi";
+import { getCanonicalContractAddress } from "../networks";
+import { InitializePayload, QuestionData, QuestionInitializedPayload } from "../model";
+import { createAncillaryData, getEventArgument } from "../utils";
 
-export class Client {
-    readonly chainID: number;
-    readonly signer: JsonRpcSigner | Wallet;
-    readonly contract: Contract;
+export class ClientV2 {
+    chainID: number;
+    signer: JsonRpcSigner | Wallet;
+    contract: Contract;
+
+    public static INTERFACE: Interface = new Interface(v2Abi);
 
     constructor(signer: JsonRpcSigner | Wallet, chainID: number, contractAddress?: string) {
-        this.signer = signer;
         this.chainID = chainID;
-        if(contractAddress != null){
-            this.contract = new Contract(contractAddress, adapterAbi, signer);
-        } else {
-            this.contract = new Contract(getAdapterAddress(chainID), adapterAbi, signer);
-        }
+        this.signer = signer;
+        this.contract = new Contract(
+            contractAddress != null ? contractAddress: getCanonicalContractAddress(2),
+            ClientV2.INTERFACE,
+            signer
+        );
     }
 
     /**
@@ -34,15 +37,10 @@ export class Client {
      * @param proposalBond
      * @returns questionID: string
      */
-     public async initialize(
-        title: string,
-        description: string,
-        outcomes: string[],
-        rewardToken: string,
-        reward: BigNumber,
-        proposalBond: BigNumber,
-        overrides?: ethers.Overrides,
-    ): Promise<QuestionInitializedPayload> {
+     public async initialize(payload: InitializePayload): Promise<QuestionInitializedPayload> {
+        let { title, description, outcomes, rewardToken, reward,
+            proposalBond, overrides } = payload;
+        
         if( overrides == null) {
             overrides = {};
         }
@@ -244,5 +242,42 @@ export class Client {
      */
     public async isAdmin(address: string): Promise<boolean> {
         return this.contract.isAdmin(address);
+    }
+
+    private async _initialize(
+        title: string,
+        description: string,
+        outcomes: string[],
+        rewardToken: string,
+        reward: BigNumber,
+        bond: BigNumber,
+        liveness?: BigNumber,
+        overrides?: ethers.Overrides,
+    ): Promise<QuestionInitializedPayload> {
+        if (outcomes.length != 2) {
+            throw new Error("Invalid outcome length! Must be 2!");
+        }
+        
+        console.log(`Initializing...`);
+
+        // Dynamically generate ancillary data with binary resolution data appended
+        const ancillaryData = createAncillaryData(title, description, outcomes);
+
+        let txn;
+        if(liveness == null){
+            txn = await this.contract.initialize(ancillaryData, rewardToken, reward, bond, overrides);
+        } else {
+            txn = await this.contract.initialize(ancillaryData, rewardToken, reward, bond, liveness, overrides);
+        }
+        console.log(`Transaction hash: ${txn.hash}`);
+        
+        const receipt: TransactionReceipt = await txn.wait();
+        const questionID = getEventArgument(receipt, this.contract.interface, "QuestionInitialized", "questionID");
+        const conditionID = getEventArgument(receipt, new Interface(ctfAbi), "ConditionPreparation", "conditionId");
+        console.log(`Question initialized!`);
+        return {
+            questionID,
+            conditionID
+        }
     }
 }
