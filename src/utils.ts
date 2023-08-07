@@ -10,7 +10,7 @@ import { Interface } from "@ethersproject/abi";
  * @returns 
  */
 export const buildResolutionData = (outcomes: string[]): string => {
-    return `p1: 0, p2: 1, p3: 0.5. Where p1 corresponds to ${outcomes[1]}, p2 to ${outcomes[0]}, p3 to unknown/50-50`;
+    return `p1: 0, p2: 1, p3: 0.5. Where p1 corresponds to ${outcomes[1]}, p2 to ${outcomes[0]}, p3 to unknown/50-50. "Updates made by the question creator via the bulletin board at 0x6A9D222616C90FcA5754cd1333cFD9b7fb6a4F74 as described by https://polygonscan.com/tx/0xa14f01b115c4913624fc3f508f960f4dea252758e73c28f5f07f8e19d7bca066 should be considered.`;
 }
 
 export const OUTCOME_REGEX = /Where p1 corresponds to (\w+), p2 to a (\w+)/;
